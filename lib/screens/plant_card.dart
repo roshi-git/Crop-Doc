@@ -4,10 +4,24 @@ import 'package:flutter/material.dart';
 class PlantCard extends StatelessWidget {
 
   final Plant plantInfo;
-  PlantCard(this.plantInfo);
+  final String languageID;
+
+  PlantCard(this.plantInfo, this.languageID);
 
   @override
   Widget build(BuildContext context) {
+
+    String plantName;
+    String plantType;
+
+    if(languageID == "EN") {
+      plantName = plantInfo.plantNameEN;
+      plantType = plantInfo.plantTypeEN;
+    }
+    else {
+      plantName = plantInfo.plantNameHI;
+      plantType = plantInfo.plantTypeHI;
+    }
 
     return InkWell(
       onTap: () {},
@@ -34,7 +48,7 @@ class PlantCard extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  plantInfo.plantNameEN,
+                  plantName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 18,
@@ -49,7 +63,7 @@ class PlantCard extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  plantInfo.plantTypeEN,
+                  plantType,
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 16,

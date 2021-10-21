@@ -120,7 +120,7 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
           child: ListView.builder(
             itemCount: plantsList.length,
             itemBuilder: (context, index) {
-            return PlantCard(plantsList[index]);
+            return PlantCard(plantsList[index], appStrings!.languageID);
           }),
         ),
       );

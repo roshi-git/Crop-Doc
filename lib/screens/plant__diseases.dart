@@ -1,25 +1,24 @@
-import 'dart:async';
-
-import 'package:crop_doctor/classes/plant_info.dart';
+import 'package:crop_doctor/classes/colors.dart';
+import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
+import 'package:crop_doctor/screens/disease_card.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:crop_doctor/classes/colors.dart';
 
-import 'plant_card.dart';
+class PlantDiseases extends StatefulWidget {
+  const PlantDiseases({Key? key}) : super(key: key);
 
-class DiseasesLibrary extends StatefulWidget {
   @override
-  _DiseasesLibraryState createState() => _DiseasesLibraryState();
+  _PlantDiseasesState createState() => _PlantDiseasesState();
 }
 
-class _DiseasesLibraryState extends State<DiseasesLibrary> {
+class _PlantDiseasesState extends State<PlantDiseases> {
 
-  List<PlantInfo> plantsList = [];
+  List<DiseaseInfo> diseaseList = [];
 
   AppStrings? appStrings;
 
@@ -35,11 +34,14 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
-  Future<AppStrings> _init() async {
+  Future<AppStrings> _init(BuildContext context) async {
+
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    String plantID = args["plantID"];
 
     await Firebase.initializeApp();
 
-    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("plantsList");
+    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("diseasesGroups").child(plantID);
 
     //TODO: DO THIS
     /*StreamSubscription dbStream = dbRef.onValue.listen((event) {
@@ -51,30 +53,30 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
     dbStream.resume();
     dbStream.cancel();*/
 
-    // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
+    // GET DISEASES NAMES AND STUFF FROM FIREBASE RTDB
     var values;
     await dbRef.get().then((snapshot) => values = snapshot.value);
 
-    List<PlantInfo> _plantsList = [];
+    List<DiseaseInfo> _diseasesList = [];
 
-    for(String plant in values.keys) {
-      _plantsList.add(
-        PlantInfo(
-          plantID: plant,
-          plantNameEN: values[plant]["plantNameEN"],
-          plantNameHI: values[plant]["plantNameHI"],
-          plantTypeEN: values[plant]["plantTypeEN"],
-          plantTypeHI: values[plant]["plantTypeHI"],
-          plantImagePath: values[plant]["imageLink"]
+    for(String disease in values.keys) {
+      _diseasesList.add(
+        DiseaseInfo(
+          diseaseID: disease,
+          diseaseNameEN: values[disease]["diseaseNameEN"],
+          diseaseNameHI: values[disease]["diseaseNameHI"],
+          diseaseDescriptionEN: "",
+          diseaseDescriptionHI: "",
+          diseaseImagePath: values[disease]["imageLink"]
         )
       );
     }
 
-    // SORT PLANTS ALPHABETICALLY
-    _plantsList.sort((a, b) => a.plantNameEN.compareTo(b.plantNameEN));
-    plantsList = _plantsList;
+    // SORT DISEASES ALPHABETICALLY
+    _diseasesList.sort((a, b) => a.diseaseNameEN.compareTo(b.diseaseNameEN));
+    diseaseList = _diseasesList;
 
-    print("Plants list fetched");
+    print("Diseases list fetched");
 
     // INIT SCREEN LANGUAGE
     AppStrings appStrings = await languageInitializer.initLanguage();
@@ -120,10 +122,10 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
         ),
         body: Center(
           child: ListView.builder(
-            itemCount: plantsList.length,
-            itemBuilder: (context, index) {
-            return PlantCard(plantsList[index], appStrings!.languageID);
-          }),
+              itemCount: diseaseList.length,
+              itemBuilder: (context, index) {
+                return DiseaseCard(diseaseList[index], appStrings!.languageID);
+              }),
         ),
       );
     }
@@ -131,7 +133,7 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
       child = Scaffold(
         body: Center(
           child: Text(
-            "Loading.."
+              "Loading.."
           ),
         ),
       );
@@ -143,8 +145,8 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
   Widget build(BuildContext context) {
 
     return FutureBuilder(
-      future: _init(),
-      builder: _buildFunction
+        future: _init(context),
+        builder: _buildFunction
     );
   }
 }

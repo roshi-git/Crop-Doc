@@ -1,35 +1,32 @@
-import 'package:crop_doctor/classes/plant_info.dart';
+import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:flutter/material.dart';
 
-class PlantCard extends StatelessWidget {
+class DiseaseCard extends StatelessWidget {
 
-  final PlantInfo plantInfo;
+  final DiseaseInfo diseaseInfo;
   final String languageID;
 
-  PlantCard(this.plantInfo, this.languageID);
+  DiseaseCard(this.diseaseInfo, this.languageID);
 
   @override
   Widget build(BuildContext context) {
 
-    String plantName;
-    String plantType;
+    String diseaseName;
 
     if(languageID == "EN") {
-      plantName = plantInfo.plantNameEN;
-      plantType = plantInfo.plantTypeEN;
+      diseaseName = diseaseInfo.diseaseNameEN;
     }
     else {
-      plantName = plantInfo.plantNameHI;
-      plantType = plantInfo.plantTypeHI;
+      diseaseName = diseaseInfo.diseaseNameHI;
     }
 
     return InkWell(
       onTap: () {
         Navigator.pushNamed(
           context,
-          "/plant_diseases",
-          arguments: {
-            "plantID": plantInfo.plantID
+            "/disease_description",
+            arguments: {
+            "diseaseID": diseaseInfo.diseaseID
           }
         );
       },
@@ -44,23 +41,9 @@ class PlantCard extends StatelessWidget {
                 height: 100,
                 width: double.infinity,
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: NetworkImage(plantInfo.plantImagePath),
+                image: AssetImage("assets/placeholder_image.png"),
+                //NetworkImage(diseaseInfo.diseaseImagePath),
                 fit: BoxFit.fitWidth,
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.only(left: 6, right: 6, top: 6),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  plantName,
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
               ),
             ),
 
@@ -69,14 +52,15 @@ class PlantCard extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  plantType,
+                  diseaseName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontSize: 16,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

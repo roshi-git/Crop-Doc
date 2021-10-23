@@ -1,4 +1,6 @@
-class Plant {
+class PlantInfo {
+
+  String plantID;
 
   String plantNameEN;
   String plantNameHI;
@@ -8,7 +10,9 @@ class Plant {
 
   String plantImagePath;
 
-  Plant({
+  PlantInfo({
+    required this.plantID,
+
     required this.plantNameEN,
     required this.plantNameHI,
 

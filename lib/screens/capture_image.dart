@@ -97,7 +97,7 @@ class _CaptureImageState extends State<CaptureImage> {
               ),
             ),
 
-            Spacer(),
+            SizedBox(height: 30),
 
             // RE-TAKE IMAGE
             ElevatedButton(

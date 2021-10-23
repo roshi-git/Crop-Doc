@@ -1,4 +1,5 @@
 import 'package:crop_doctor/screens/about.dart';
+import 'package:crop_doctor/screens/disease_description.dart';
 import 'package:crop_doctor/screens/examine_leaf.dart';
 import 'package:crop_doctor/screens/image_details.dart';
 import 'package:crop_doctor/screens/images_library.dart';
@@ -6,6 +7,7 @@ import 'package:crop_doctor/screens/diseases_library.dart';
 import 'package:crop_doctor/screens/capture_image.dart';
 import 'package:crop_doctor/screens/home.dart';
 import 'package:crop_doctor/screens/load_image.dart';
+import 'package:crop_doctor/screens/plant__diseases.dart';
 
 import 'package:flutter/material.dart';
 
@@ -23,7 +25,9 @@ void main() {
       "/disease_library":  (context) => DiseasesLibrary(),
       "/about":  (context) => About(),
       "/examine_leaf": (context) => ExamineLeaf(),
-      "/image_details": (context) => ImageDetails()
+      "/image_details": (context) => ImageDetails(),
+      "/plant_diseases": (context) => PlantDiseases(),
+      "/disease_description": (context) => DiseaseDescription()
     }
   ));
 }

@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/language_init.dart';
+import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class ImageDetails extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class _ImageDetailsState extends State<ImageDetails> {
 
   Image? loadedImage;
   AppStrings? appStrings;
+  Box<ProcessedImage>? processedImages;
 
   void setLanguage(String languageID) {
 
@@ -29,13 +32,32 @@ class _ImageDetailsState extends State<ImageDetails> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
+  Future<Map> _init(BuildContext context) async {
+
+    var arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    String filePath = arguments["filePath"];
+    String diseaseID = arguments["diseaseID"];
+    loadedImage = Image.file(File(filePath));
+
+    processedImages = Hive.box<ProcessedImage>("processedImages");
+    processedImages!.add(ProcessedImage(
+        imagePath: filePath,
+        diseaseID: diseaseID
+    ));
+
+    AppStrings appStrings = await languageInitializer.initLanguage();
+
+    return {"appStrings": appStrings};
+  }
+
   Widget _builderFunction(BuildContext context, AsyncSnapshot snapshot) {
 
     Widget child;
+    double fontSize = 18;
 
     if(snapshot.hasData) {
 
-      appStrings = snapshot.data;
+      appStrings = snapshot.data["appStrings"];
 
       child = Scaffold(
 
@@ -67,9 +89,56 @@ class _ImageDetailsState extends State<ImageDetails> {
           backgroundColor: AppColor.appBarColorLight,
           title: Text(appStrings!.leafInfo),
         ),
-        body: Center(
-          child: Container(
-            child: loadedImage,
+        body: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: ListView(
+            children: [
+              Container(
+                child: loadedImage,
+              ),
+
+              SizedBox(height: 20),
+
+              Row(
+                children: [
+                  Text(
+                    "Disease Name:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: fontSize
+                    ),
+                  ),
+
+                  SizedBox(width: 10),
+
+                  Text(
+                    "<disease name>",
+                    style: TextStyle(
+                      fontSize: fontSize
+                    ),
+                  )
+                ],
+              ),
+
+              SizedBox(height: 20),
+
+              Text(
+                "Disease description -",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: fontSize
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Text(
+                "<disease description>",
+                style: TextStyle(
+                  fontSize: fontSize
+                ),
+              )
+            ]
           ),
         ),
       );
@@ -89,13 +158,8 @@ class _ImageDetailsState extends State<ImageDetails> {
   @override
   Widget build(BuildContext context) {
 
-    var arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    String filePath = arguments["filePath"];
-
-    loadedImage = Image.file(File(filePath));
-
     return FutureBuilder(
-      future: languageInitializer.initLanguage(),
+      future: _init(context),
       builder: _builderFunction
     );
   }

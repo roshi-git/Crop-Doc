@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:crop_doctor/classes/language_init.dart';
+import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
+
+import 'package:hive_flutter/hive_flutter.dart';
 
 class ImagesLibrary extends StatefulWidget {
   @override
@@ -13,6 +18,7 @@ class ImagesLibrary extends StatefulWidget {
 class _ImagesLibraryState extends State<ImagesLibrary> {
 
   AppStrings? appStrings;
+  Box<ProcessedImage>? processedImagesDatabase;
 
   void setLanguage(String languageID) {
 
@@ -26,13 +32,22 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
+  Future<Map> _init(BuildContext context) async {
+
+    processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+
+    AppStrings appStrings = await languageInitializer.initLanguage();
+
+    return {"appStrings": appStrings};
+  }
+
   Widget _buildFunction(BuildContext context, AsyncSnapshot snapshot) {
 
     Widget child;
 
     if(snapshot.hasData) {
 
-      appStrings = snapshot.data;
+      appStrings = snapshot.data["appStrings"];
 
       child = Scaffold(
 
@@ -67,6 +82,34 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
           title: Text(appStrings!.imageLibrary),
           backgroundColor: AppColor.appBarColorLight,
         ),
+        body: ValueListenableBuilder(
+          valueListenable: processedImagesDatabase!.listenable(),
+          builder: (BuildContext context, value, Widget? child) {
+
+            List<int> imagesList = processedImagesDatabase!.keys.cast<int>().toList();
+            return ListView.separated(
+                itemBuilder: (context, index) {
+
+                  int key = imagesList[index];
+                  ProcessedImage? processedImage = processedImagesDatabase!.get(key);
+                  Image loadedImage = Image.file(File(processedImage!.imagePath));
+
+                  return InkWell(
+                    onTap: () {},
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Container(
+                          child: loadedImage,
+                        )
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) => Divider(),
+                itemCount: imagesList.length);
+          },
+        ),
       );
     }
     else
@@ -85,7 +128,7 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
   Widget build(BuildContext context) {
 
     return FutureBuilder(
-      future: languageInitializer.initLanguage(),
+      future: _init(context),
       builder: _buildFunction
     );
   }

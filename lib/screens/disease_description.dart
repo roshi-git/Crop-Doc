@@ -146,8 +146,7 @@ class _DiseaseDescriptionState extends State<DiseaseDescription> {
               padding: const EdgeInsets.all(6),
               child: FadeInImage(
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: AssetImage("assets/placeholder_image.png"),
-                //NetworkImage(diseaseInfo.diseaseImagePath),
+                image: NetworkImage(_diseaseInfo.diseaseImagePath),
                 fit: BoxFit.fitWidth,
               ),
             ),

@@ -38,11 +38,10 @@ class DiseaseCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(6),
               child: FadeInImage(
-                height: 100,
+                height: 200,
                 width: double.infinity,
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: AssetImage("assets/placeholder_image.png"),
-                //NetworkImage(diseaseInfo.diseaseImagePath),
+                image: NetworkImage(diseaseInfo.diseaseImagePath),
                 fit: BoxFit.fitWidth,
               ),
             ),

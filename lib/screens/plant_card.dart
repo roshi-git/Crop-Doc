@@ -41,7 +41,7 @@ class PlantCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(6),
               child: FadeInImage(
-                height: 100,
+                height: 200,
                 width: double.infinity,
                 placeholder: AssetImage("assets/placeholder_image.png"),
                 image: NetworkImage(plantInfo.plantImagePath),

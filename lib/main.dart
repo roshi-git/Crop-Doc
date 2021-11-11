@@ -1,3 +1,4 @@
+import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/screens/about.dart';
 import 'package:crop_doctor/screens/disease_description.dart';
 import 'package:crop_doctor/screens/examine_leaf.dart';
@@ -10,10 +11,18 @@ import 'package:crop_doctor/screens/load_image.dart';
 import 'package:crop_doctor/screens/plant__diseases.dart';
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
+void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  final document = await getApplicationDocumentsDirectory();
+  Hive.init(document.path);
+
+  Hive.registerAdapter(ProcessedImageAdapter());
+  Hive.openBox<ProcessedImage>("processedImages");
 
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,

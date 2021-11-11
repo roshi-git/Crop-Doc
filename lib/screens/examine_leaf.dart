@@ -113,9 +113,14 @@ setState(() {
 
     var arguments = ModalRoute.of(context)!.settings.arguments as Map;
     String filePath = arguments["filePath"];
+    String diseaseID = "0";
 
     Future.delayed(Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, "/image_details", arguments: {"filePath": filePath});
+      var arguments = {
+        "filePath": filePath,
+        "diseaseID": diseaseID,
+      };
+      Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
     });
 
     return FutureBuilder(

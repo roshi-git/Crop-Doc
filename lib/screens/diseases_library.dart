@@ -18,8 +18,6 @@ class DiseasesLibrary extends StatefulWidget {
 
 class _DiseasesLibraryState extends State<DiseasesLibrary> {
 
-  //List<PlantInfo> plantsList = [];
-
   AppStrings? appStrings;
 
   void setLanguage(String languageID) {

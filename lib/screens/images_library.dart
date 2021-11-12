@@ -18,7 +18,6 @@ class ImagesLibrary extends StatefulWidget {
 class _ImagesLibraryState extends State<ImagesLibrary> {
 
   AppStrings? appStrings;
-  Box<ProcessedImage>? processedImagesDatabase;
 
   void setLanguage(String languageID) {
 
@@ -34,11 +33,11 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
 
   Future<Map> _init(BuildContext context) async {
 
-    processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
 
     AppStrings appStrings = await languageInitializer.initLanguage();
 
-    return {"appStrings": appStrings};
+    return {"appStrings": appStrings, "hiveBox": processedImagesDatabase};
   }
 
   Widget _buildFunction(BuildContext context, AsyncSnapshot snapshot) {
@@ -48,6 +47,7 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
     if(snapshot.hasData) {
 
       appStrings = snapshot.data["appStrings"];
+      Box<ProcessedImage> processedImagesDatabase = snapshot.data["hiveBox"];
 
       child = Scaffold(
 
@@ -83,15 +83,15 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
           backgroundColor: AppColor.appBarColorLight,
         ),
         body: ValueListenableBuilder(
-          valueListenable: processedImagesDatabase!.listenable(),
+          valueListenable: processedImagesDatabase.listenable(),
           builder: (BuildContext context, value, Widget? child) {
 
-            List<int> imagesList = processedImagesDatabase!.keys.cast<int>().toList();
+            List<int> imagesList = processedImagesDatabase.keys.cast<int>().toList();
             return ListView.separated(
               itemBuilder: (context, index) {
 
                 int key = imagesList[index];
-                ProcessedImage? processedImage = processedImagesDatabase!.get(key);
+                ProcessedImage? processedImage = processedImagesDatabase.get(key);
                 Image loadedImage = Image.file(File(processedImage!.imagePath));
 
                 return InkWell(

@@ -88,26 +88,27 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
 
             List<int> imagesList = processedImagesDatabase!.keys.cast<int>().toList();
             return ListView.separated(
-                itemBuilder: (context, index) {
+              itemBuilder: (context, index) {
 
-                  int key = imagesList[index];
-                  ProcessedImage? processedImage = processedImagesDatabase!.get(key);
-                  Image loadedImage = Image.file(File(processedImage!.imagePath));
+                int key = imagesList[index];
+                ProcessedImage? processedImage = processedImagesDatabase!.get(key);
+                Image loadedImage = Image.file(File(processedImage!.imagePath));
 
-                  return InkWell(
-                    onTap: () {},
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: Container(
-                          child: loadedImage,
-                        )
-                      ),
+                return InkWell(
+                  onTap: () {},
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Container(
+                        child: loadedImage,
+                      )
                     ),
-                  );
-                },
-                separatorBuilder: (context, index) => Divider(),
-                itemCount: imagesList.length);
+                  ),
+                );
+              },
+              separatorBuilder: (context, index) => Divider(),
+              itemCount: imagesList.length
+            );
           },
         ),
       );

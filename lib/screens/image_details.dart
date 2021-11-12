@@ -18,7 +18,7 @@ class _ImageDetailsState extends State<ImageDetails> {
 
   Image? loadedImage;
   AppStrings? appStrings;
-  Box<ProcessedImage>? processedImages;
+  Box<ProcessedImage>? processedImagesDatabase;
 
   void setLanguage(String languageID) {
 
@@ -39,8 +39,8 @@ class _ImageDetailsState extends State<ImageDetails> {
     String diseaseID = arguments["diseaseID"];
     loadedImage = Image.file(File(filePath));
 
-    processedImages = Hive.box<ProcessedImage>("processedImages");
-    processedImages!.add(ProcessedImage(
+    processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    processedImagesDatabase!.add(ProcessedImage(
         imagePath: filePath,
         diseaseID: diseaseID
     ));

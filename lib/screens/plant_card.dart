@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:crop_doctor/classes/plant_info.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +46,7 @@ class PlantCard extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: NetworkImage(plantInfo.plantImagePath),
+                image: FileImage(File(plantInfo.plantImagePath)),
                 fit: BoxFit.fitWidth,
               ),
             ),

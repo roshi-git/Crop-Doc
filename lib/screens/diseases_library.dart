@@ -5,10 +5,9 @@ import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'plant_card.dart';
 
@@ -19,7 +18,7 @@ class DiseasesLibrary extends StatefulWidget {
 
 class _DiseasesLibraryState extends State<DiseasesLibrary> {
 
-  List<PlantInfo> plantsList = [];
+  //List<PlantInfo> plantsList = [];
 
   AppStrings? appStrings;
 
@@ -35,51 +34,14 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
-  Future<AppStrings> _init() async {
+  Future<Map> _init() async {
 
-    await Firebase.initializeApp();
-
-    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("plantsList");
-
-    //TODO: DO THIS
-    /*StreamSubscription dbStream = dbRef.onValue.listen((event) {
-      var val = event.snapshot.value;
-      var key = event.snapshot.key;
-      print(val);
-      print(key);
-    });
-    dbStream.resume();
-    dbStream.cancel();*/
-
-    // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
-    var values;
-    await dbRef.get().then((snapshot) => values = snapshot.value);
-
-    List<PlantInfo> _plantsList = [];
-
-    for(String plant in values.keys) {
-      _plantsList.add(
-        PlantInfo(
-          plantID: plant,
-          plantNameEN: values[plant]["plantNameEN"],
-          plantNameHI: values[plant]["plantNameHI"],
-          plantTypeEN: values[plant]["plantTypeEN"],
-          plantTypeHI: values[plant]["plantTypeHI"],
-          plantImagePath: values[plant]["imageLink"]
-        )
-      );
-    }
-
-    // SORT PLANTS ALPHABETICALLY
-    _plantsList.sort((a, b) => a.plantNameEN.compareTo(b.plantNameEN));
-    plantsList = _plantsList;
-
-    print("Plants list fetched");
+    Box<PlantInfo> plantInfoDatabase = Hive.box<PlantInfo>("plantInfo");
 
     // INIT SCREEN LANGUAGE
     AppStrings appStrings = await languageInitializer.initLanguage();
 
-    return appStrings;
+    return {"appStrings": appStrings, "hiveBox": plantInfoDatabase};
   }
 
   Widget _buildFunction(BuildContext buildContext, AsyncSnapshot snapshot) {
@@ -88,7 +50,8 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
 
     if(snapshot.hasData) {
 
-      appStrings = snapshot.data;
+      appStrings = snapshot.data["appStrings"];
+      Box<PlantInfo> plantInfoDatabase = snapshot.data["hiveBox"];
 
       child = Scaffold(
         floatingActionButton: FloatingActionButton.extended(
@@ -118,12 +81,25 @@ class _DiseasesLibraryState extends State<DiseasesLibrary> {
           title: Text(appStrings!.diseasesLibrary),
           backgroundColor: AppColor.appBarColorLight,
         ),
-        body: Center(
-          child: ListView.builder(
-            itemCount: plantsList.length,
-            itemBuilder: (context, index) {
-            return PlantCard(plantsList[index], appStrings!.languageID);
-          }),
+        body: ValueListenableBuilder(
+          valueListenable: plantInfoDatabase.listenable(),
+          builder: (BuildContext context, Box<PlantInfo> value, Widget? child) {
+
+            List<String> plantInfoList = plantInfoDatabase.keys.cast<String>().toList();
+
+            return ListView.separated(
+
+              itemBuilder: (context, index) {
+
+                String key = plantInfoList[index];
+                PlantInfo? plantInfo = plantInfoDatabase.get(key);
+
+                return PlantCard(plantInfo!, appStrings!.languageID);
+              },
+              separatorBuilder: (context, index) => Divider(),
+              itemCount: plantInfoList.length
+            );
+          },
         ),
       );
     }

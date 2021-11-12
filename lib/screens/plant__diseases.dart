@@ -87,14 +87,14 @@ class _PlantDiseasesState extends State<PlantDiseases> {
         ),
         body: Center(
           child: ListView.builder(
-              itemCount: diseasesList.length,
-              itemBuilder: (context, index) {
-                return DiseaseCard(
-                  diseasesList[index],
-                  appStrings!.languageID,
-                  diseaseInfoDatabase.get(diseasesList[index].diseaseID)!.diseaseImagePath
-                );
-              }),
+            itemCount: diseasesList.length,
+            itemBuilder: (context, index) {
+              return DiseaseCard(
+                diseasesList[index],
+                appStrings!.languageID,
+                diseaseInfoDatabase.get(diseasesList[index].diseaseID)!.diseaseImagePath
+              );
+            }),
         ),
       );
     }
@@ -102,7 +102,7 @@ class _PlantDiseasesState extends State<PlantDiseases> {
       child = Scaffold(
         body: Center(
           child: Text(
-              "Loading.."
+            "Loading.."
           ),
         ),
       );
@@ -114,8 +114,8 @@ class _PlantDiseasesState extends State<PlantDiseases> {
   Widget build(BuildContext context) {
 
     return FutureBuilder(
-        future: _init(context),
-        builder: _buildFunction
+      future: _init(context),
+      builder: _buildFunction
     );
   }
 }

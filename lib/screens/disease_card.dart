@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease.dart';
 import 'package:flutter/material.dart';
 
@@ -34,32 +35,42 @@ class DiseaseCard extends StatelessWidget {
         );
       },
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: Colors.grey.withOpacity(0.4),
+            width: 2,
+          ),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
 
             Padding(
-              padding: const EdgeInsets.all(6),
-              child: FadeInImage(
-                height: 200,
-                width: double.infinity,
-                placeholder: AssetImage("assets/placeholder_image.png"),
-                image: FileImage(
-                  File(imagePath)
+              padding: const EdgeInsets.all(12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: FadeInImage(
+                  height: 200,
+                  width: double.infinity,
+                  placeholder: AssetImage("assets/placeholder_image.png"),
+                  image: FileImage(
+                    File(imagePath)
+                  ),
+                  fit: BoxFit.fitWidth,
                 ),
-                fit: BoxFit.fitWidth,
               ),
             ),
 
             Padding(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(12),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   diseaseName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold
                   ),
                 ),

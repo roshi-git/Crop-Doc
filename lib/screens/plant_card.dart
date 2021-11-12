@@ -36,30 +36,40 @@ class PlantCard extends StatelessWidget {
         );
       },
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: Colors.grey.withOpacity(0.4),
+            width: 2,
+          ),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
 
             Padding(
-              padding: const EdgeInsets.all(6),
-              child: FadeInImage(
-                height: 200,
-                width: double.infinity,
-                placeholder: AssetImage("assets/placeholder_image.png"),
-                image: FileImage(File(plantInfo.plantImagePath)),
-                fit: BoxFit.fitWidth,
+              padding: const EdgeInsets.all(12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: FadeInImage(
+                  height: 200,
+                  width: double.infinity,
+                  placeholder: AssetImage("assets/placeholder_image.png"),
+                  image: FileImage(File(plantInfo.plantImagePath)),
+                  fit: BoxFit.fitWidth,
+                ),
               ),
             ),
 
             Padding(
-              padding: const EdgeInsets.only(left: 6, right: 6, top: 6),
+              padding: const EdgeInsets.only(left: 18, right: 12, top: 12),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   plantName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold
                   ),
                 ),
@@ -67,7 +77,7 @@ class PlantCard extends StatelessWidget {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.only(left: 18, right: 12, top: 6, bottom: 12),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(

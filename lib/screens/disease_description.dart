@@ -109,49 +109,46 @@ class _DiseaseDescriptionState extends State<DiseaseDescription> {
           title: Text(appStrings!.diseasesLibrary),
           backgroundColor: AppColor.appBarColorLight,
         ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: FadeInImage(
+        body: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: ListView(
+            children: [
+              FadeInImage(
                 placeholder: AssetImage("assets/placeholder_image.png"),
                 image: FileImage(File(_diseaseInfo.diseaseImagePath)),
                 fit: BoxFit.fitWidth,
               ),
-            ),
 
-            // DISEASE NAME
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Align(
+              SizedBox(height: 20),
+
+              // DISEASE NAME
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   diseaseName,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
               ),
-            ),
 
-            // DISEASE DESCRIPTION
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: Align(
+              SizedBox(height: 20),
+
+              // DISEASE DESCRIPTION
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   diseaseDescription,
                   textAlign: TextAlign.left,
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold
+                    fontSize: 18,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -159,7 +156,7 @@ class _DiseaseDescriptionState extends State<DiseaseDescription> {
       child = Scaffold(
         body: Center(
           child: Text(
-              "Loading.."
+            "Loading.."
           ),
         ),
       );

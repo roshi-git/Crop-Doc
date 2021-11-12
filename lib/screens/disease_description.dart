@@ -1,12 +1,13 @@
+import 'dart:io';
+
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class DiseaseDescription extends StatefulWidget {
   const DiseaseDescription({Key? key}) : super(key: key);
@@ -18,16 +19,6 @@ class DiseaseDescription extends StatefulWidget {
 class _DiseaseDescriptionState extends State<DiseaseDescription> {
 
   AppStrings? appStrings;
-
-  //TODO: DO THIS
-  /*StreamSubscription dbStream = dbRef.onValue.listen((event) {
-      var val = event.snapshot.value;
-      var key = event.snapshot.key;
-      print(val);
-      print(key);
-    });
-    dbStream.resume();
-    dbStream.cancel();*/
 
   void setLanguage(String languageID) {
 
@@ -46,30 +37,8 @@ class _DiseaseDescriptionState extends State<DiseaseDescription> {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     String diseaseID = args["diseaseID"];
 
-    await Firebase.initializeApp();
-
-    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("diseasesList").child(diseaseID);
-
-    // GET DISEASE DESCRIPTION AND STUFF FROM FIREBASE RTDB
-    var values;
-    await dbRef.get().then((snapshot) => values = snapshot.value);
-
-    String diseaseNameEN = values["diseaseNameEN"];
-    String diseaseNameHI = values["diseaseNameHI"];
-    String descriptionEN = values["descriptionEN"];
-    String descriptionHI = values["descriptionHI"];
-    String imageLink = values["imageLink"];
-
-    DiseaseInfo diseaseInfo = DiseaseInfo(
-      diseaseID: diseaseID,
-      diseaseNameEN: diseaseNameEN,
-      diseaseNameHI: diseaseNameHI,
-      diseaseDescriptionEN: descriptionEN,
-      diseaseDescriptionHI: descriptionHI,
-      diseaseImagePath: imageLink
-    );
-
-    print("Disease info fetched");
+    Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
+    DiseaseInfo? diseaseInfo = diseaseInfoDatabase.get(diseaseID);
 
     // INIT SCREEN LANGUAGE
     AppStrings appStrings = await languageInitializer.initLanguage();
@@ -146,7 +115,7 @@ class _DiseaseDescriptionState extends State<DiseaseDescription> {
               padding: const EdgeInsets.all(6),
               child: FadeInImage(
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: NetworkImage(_diseaseInfo.diseaseImagePath),
+                image: FileImage(File(_diseaseInfo.diseaseImagePath)),
                 fit: BoxFit.fitWidth,
               ),
             ),

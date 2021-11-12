@@ -1,12 +1,15 @@
-import 'package:crop_doctor/classes/disease_info.dart';
+import 'dart:io';
+
+import 'package:crop_doctor/classes/disease.dart';
 import 'package:flutter/material.dart';
 
 class DiseaseCard extends StatelessWidget {
 
-  final DiseaseInfo diseaseInfo;
+  final Disease disease;
   final String languageID;
+  final String imagePath;
 
-  DiseaseCard(this.diseaseInfo, this.languageID);
+  DiseaseCard(this.disease, this.languageID, this.imagePath);
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +17,10 @@ class DiseaseCard extends StatelessWidget {
     String diseaseName;
 
     if(languageID == "EN") {
-      diseaseName = diseaseInfo.diseaseNameEN;
+      diseaseName = disease.diseaseNameEN;
     }
     else {
-      diseaseName = diseaseInfo.diseaseNameHI;
+      diseaseName = disease.diseaseNameHI;
     }
 
     return InkWell(
@@ -26,7 +29,7 @@ class DiseaseCard extends StatelessWidget {
           context,
             "/disease_description",
             arguments: {
-            "diseaseID": diseaseInfo.diseaseID
+            "diseaseID": disease.diseaseID
           }
         );
       },
@@ -41,7 +44,9 @@ class DiseaseCard extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 placeholder: AssetImage("assets/placeholder_image.png"),
-                image: NetworkImage(diseaseInfo.diseaseImagePath),
+                image: FileImage(
+                  File(imagePath)
+                ),
                 fit: BoxFit.fitWidth,
               ),
             ),

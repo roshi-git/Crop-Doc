@@ -1,13 +1,13 @@
 import 'package:crop_doctor/classes/colors.dart';
+import 'package:crop_doctor/classes/disease.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:crop_doctor/screens/disease_card.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class PlantDiseases extends StatefulWidget {
   const PlantDiseases({Key? key}) : super(key: key);
@@ -17,8 +17,6 @@ class PlantDiseases extends StatefulWidget {
 }
 
 class _PlantDiseasesState extends State<PlantDiseases> {
-
-  List<DiseaseInfo> diseaseList = [];
 
   AppStrings? appStrings;
 
@@ -34,54 +32,19 @@ class _PlantDiseasesState extends State<PlantDiseases> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
-  Future<AppStrings> _init(BuildContext context) async {
+  Future<Map> _init(BuildContext context) async {
 
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     String plantID = args["plantID"];
 
-    await Firebase.initializeApp();
-
-    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("diseasesGroups").child(plantID);
-
-    //TODO: DO THIS
-    /*StreamSubscription dbStream = dbRef.onValue.listen((event) {
-      var val = event.snapshot.value;
-      var key = event.snapshot.key;
-      print(val);
-      print(key);
-    });
-    dbStream.resume();
-    dbStream.cancel();*/
-
-    // GET DISEASES NAMES AND STUFF FROM FIREBASE RTDB
-    var values;
-    await dbRef.get().then((snapshot) => values = snapshot.value);
-
-    List<DiseaseInfo> _diseasesList = [];
-
-    for(String disease in values.keys) {
-      _diseasesList.add(
-        DiseaseInfo(
-          diseaseID: disease,
-          diseaseNameEN: values[disease]["diseaseNameEN"],
-          diseaseNameHI: values[disease]["diseaseNameHI"],
-          diseaseDescriptionEN: "",
-          diseaseDescriptionHI: "",
-          diseaseImagePath: values[disease]["imageLink"]
-        )
-      );
-    }
-
-    // SORT DISEASES ALPHABETICALLY
-    _diseasesList.sort((a, b) => a.diseaseNameEN.compareTo(b.diseaseNameEN));
-    diseaseList = _diseasesList;
-
-    print("Diseases list fetched");
+    Box<List<Disease>> diseaseListDatabase = Hive.box<List<Disease>>("diseases");
+    Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
+    List<Disease>? diseasesList = diseaseListDatabase.get(plantID);
 
     // INIT SCREEN LANGUAGE
     AppStrings appStrings = await languageInitializer.initLanguage();
 
-    return appStrings;
+    return {"appStrings": appStrings, "diseasesList": diseasesList, "diseasesInfoBox": diseaseInfoDatabase};
   }
 
   Widget _buildFunction(BuildContext buildContext, AsyncSnapshot snapshot) {
@@ -90,7 +53,9 @@ class _PlantDiseasesState extends State<PlantDiseases> {
 
     if(snapshot.hasData) {
 
-      appStrings = snapshot.data;
+      appStrings = snapshot.data["appStrings"];
+      List<Disease> diseasesList = snapshot.data["diseasesList"];
+      Box<DiseaseInfo> diseaseInfoDatabase = snapshot.data["diseasesInfoBox"];
 
       child = Scaffold(
         floatingActionButton: FloatingActionButton.extended(
@@ -122,9 +87,13 @@ class _PlantDiseasesState extends State<PlantDiseases> {
         ),
         body: Center(
           child: ListView.builder(
-              itemCount: diseaseList.length,
+              itemCount: diseasesList.length,
               itemBuilder: (context, index) {
-                return DiseaseCard(diseaseList[index], appStrings!.languageID);
+                return DiseaseCard(
+                  diseasesList[index],
+                  appStrings!.languageID,
+                  diseaseInfoDatabase.get(diseasesList[index].diseaseID)!.diseaseImagePath
+                );
               }),
         ),
       );

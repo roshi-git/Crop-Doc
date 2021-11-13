@@ -26,7 +26,14 @@ class ProcessedImageCard extends StatelessWidget {
     }
 
     return InkWell(
-      onTap: () {},
+      onTap: () async {
+        var arguments = {
+          "filePath": processedImage.imagePath,
+          "diseaseID": processedImage.diseaseID,
+        };
+
+        await Navigator.pushNamed(context, "/image_details", arguments: arguments);
+      },
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:crop_doctor/classes/colors.dart';
+import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/language_init.dart';
-import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
@@ -34,29 +34,39 @@ class _ImageDetailsState extends State<ImageDetails> {
   Future<Map> _init(BuildContext context) async {
 
     var arguments = ModalRoute.of(context)!.settings.arguments as Map;
+
     String filePath = arguments["filePath"];
-    String diseaseID = arguments["diseaseID"];
     loadedImage = Image.file(File(filePath));
 
-    Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
-    processedImagesDatabase.add(ProcessedImage(
-      imagePath: filePath,
-      diseaseID: diseaseID,
-      epochSeconds: DateTime.now().millisecondsSinceEpoch
-    ));
+    String diseaseID = arguments["diseaseID"];
+    Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
+    DiseaseInfo? diseaseInfo = diseaseInfoDatabase.get(diseaseID);
+
     AppStrings appStrings = await languageInitializer.initLanguage();
 
-    return {"appStrings": appStrings};
+    return {"appStrings": appStrings, "diseaseInfo": diseaseInfo};
   }
 
   Widget _builderFunction(BuildContext context, AsyncSnapshot snapshot) {
 
     Widget child;
-    double fontSize = 18;
 
     if(snapshot.hasData) {
 
       appStrings = snapshot.data["appStrings"];
+      DiseaseInfo diseaseInfo = snapshot.data["diseaseInfo"];
+      String languageID = appStrings!.languageID;
+      String diseaseName;
+      String diseaseDescription;
+
+      if(languageID == "EN") {
+        diseaseName = diseaseInfo.diseaseNameEN;
+        diseaseDescription = diseaseInfo.diseaseDescriptionEN;
+      }
+      else {
+        diseaseName = diseaseInfo.diseaseNameHI;
+        diseaseDescription = diseaseInfo.diseaseDescriptionHI;
+      }
 
       child = Scaffold(
 
@@ -82,7 +92,8 @@ class _ImageDetailsState extends State<ImageDetails> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName("/"));
+              //Navigator.popUntil(context, ModalRoute.withName("/"));
+              Navigator.pop(context);
             },
           ),
           backgroundColor: AppColor.appBarColorLight,
@@ -98,43 +109,20 @@ class _ImageDetailsState extends State<ImageDetails> {
 
               SizedBox(height: 20),
 
-              Row(
-                children: [
-                  Text(
-                    "Disease Name:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: fontSize
-                    ),
-                  ),
-
-                  SizedBox(width: 10),
-
-                  Text(
-                    "<disease name>",
-                    style: TextStyle(
-                      fontSize: fontSize
-                    ),
-                  )
-                ],
+              Text(
+                diseaseName,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold
+                ),
               ),
 
               SizedBox(height: 20),
 
               Text(
-                "Disease description -",
+                diseaseDescription,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: fontSize
-                ),
-              ),
-
-              SizedBox(height: 10),
-
-              Text(
-                "<disease description>",
-                style: TextStyle(
-                  fontSize: fontSize
+                  fontSize: 18
                 ),
               )
             ]

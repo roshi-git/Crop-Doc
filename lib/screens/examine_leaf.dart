@@ -1,7 +1,9 @@
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/language_init.dart';
+import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
 class ExamineLeaf extends StatefulWidget {
   @override
@@ -57,10 +59,19 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     String diseaseID = "disease 01";
 
     Future.delayed(Duration(seconds: 3), () {
+
+      Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+      processedImagesDatabase.add(ProcessedImage(
+          imagePath: filePath,
+          diseaseID: diseaseID,
+          epochSeconds: DateTime.now().millisecondsSinceEpoch
+      ));
+
       var arguments = {
         "filePath": filePath,
         "diseaseID": diseaseID,
       };
+
       Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
     });
 

@@ -122,7 +122,7 @@ class _CaptureImageState extends State<CaptureImage> {
             // EXAMINE LEAF
             ElevatedButton(
               onPressed: () async {
-                await Navigator.pushNamed(context, "/examine_leaf", arguments: {"filePath": filePath!});
+                await Navigator.pushReplacementNamed(context, "/examine_leaf", arguments: {"filePath": filePath!});
               },
               style: ElevatedButton.styleFrom(
                   primary: examineLeafButtonColor,

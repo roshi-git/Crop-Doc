@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease.dart';
 import 'package:flutter/material.dart';
 

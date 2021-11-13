@@ -1,23 +1,20 @@
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 
 class LanguageInitializer {
 
-  String? languageID;
-  AppStrings? appStrings;
-  var prefs;
+    Box appStates = Hive.box("appStates");
 
   void setLanguage(String languageID) {
-    prefs.setString("languageID", languageID);
+    appStates.put("languageID", languageID);
   }
 
   Future<AppStrings> initLanguage() async {
 
-    prefs = await SharedPreferences.getInstance();
-    languageID = await prefs.getString("languageID") ?? "EN";
-    await prefs.setString("languageID", languageID);
+    AppStrings appStrings;
+    String languageID = appStates.get("languageID");
 
     if(languageID == "EN")
       appStrings = AppStringsEN();
@@ -26,6 +23,6 @@ class LanguageInitializer {
 
     print(languageID);
 
-    return appStrings!;
+    return appStrings;
   }
 }

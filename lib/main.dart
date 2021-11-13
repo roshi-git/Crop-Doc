@@ -32,16 +32,58 @@ void main() async {
   Hive.init(appDirectory.path);
 
   Hive.registerAdapter(ProcessedImageAdapter());
-  Hive.openBox<ProcessedImage>("processedImages");
+  await Hive.openBox<ProcessedImage>("processedImages");
 
   Hive.registerAdapter(PlantInfoAdapter());
-  Hive.openBox<PlantInfo>("plantInfo");
+  await Hive.openBox<PlantInfo>("plantInfo");
 
   Hive.registerAdapter(DiseaseAdapter());
-  Hive.openBox<List<Disease>>("diseases");
+  await Hive.openBox<List<Disease>>("diseases");
 
   Hive.registerAdapter(DiseaseInfoAdapter());
-  Hive.openBox<DiseaseInfo>("diseaseInfo");
+  await Hive.openBox<DiseaseInfo>("diseaseInfo");
+
+  await Hive.openBox("appStates");
+
+  Box appStates = Hive.box("appStates");
+
+  var languageID = appStates.get("languageID");
+  if(languageID == null) {
+    appStates.put("languageID", "EN");
+  }
+
+  var firstLaunch = appStates.get("firstLaunch");
+  if(firstLaunch == null) {
+    firstLaunch = true;
+    appStates.put("firstLaunch", true);
+  }
+  MaterialApp _runApp;
+
+  // MATERIAL APP TO RUN IF DATABASE CONTAINS ALL DATA
+  MaterialApp materialApp = MaterialApp(
+      debugShowCheckedModeBanner: false,
+      routes: {
+        "/": (context) => Home(),
+        "/capture_image":  (context) => CaptureImage(),
+        "/load_image": (context) => LoadImage(),
+        "/images_library":  (context) => ImagesLibrary(),
+        "/disease_library":  (context) => DiseasesLibrary(),
+        "/about":  (context) => About(),
+        "/examine_leaf": (context) => ExamineLeaf(),
+        "/image_details": (context) => ImageDetails(),
+        "/plant_diseases": (context) => PlantDiseases(),
+        "/disease_description": (context) => DiseaseDescription()
+      }
+  );
+
+  // MATERIAL APP TO RUN IF DATABASE IS MISSING SOME DATA
+  MaterialApp materialAppError = MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+            child: Text("No internet connection available")),
+      )
+  );
 
   // CHECK INTERNET CONNECTIVITY
   Connectivity connectivity = Connectivity();
@@ -50,23 +92,18 @@ void main() async {
   // FETCH DATA FROM FIREBASE
   if(connectivityResult != ConnectivityResult.none) {
     await fetchPlantInfo(appDirectory);
+    if(firstLaunch)
+      appStates.put("firstLaunch", false);
+    _runApp = materialApp;
+  }
+  else {
+    if(firstLaunch)
+      _runApp = materialAppError;
+    else
+      _runApp = materialApp;
   }
 
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    routes: {
-      "/": (context) => Home(),
-      "/capture_image":  (context) => CaptureImage(),
-      "/load_image": (context) => LoadImage(),
-      "/images_library":  (context) => ImagesLibrary(),
-      "/disease_library":  (context) => DiseasesLibrary(),
-      "/about":  (context) => About(),
-      "/examine_leaf": (context) => ExamineLeaf(),
-      "/image_details": (context) => ImageDetails(),
-      "/plant_diseases": (context) => PlantDiseases(),
-      "/disease_description": (context) => DiseaseDescription()
-    }
-  ));
+  runApp(_runApp);
 }
 
 Future<void> fetchPlantInfo(var appDirectory) async {

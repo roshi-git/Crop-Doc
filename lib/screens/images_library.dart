@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:crop_doctor/classes/disease_info.dart';
+import 'package:crop_doctor/screens/processed_image_card.dart';
+import 'package:intl/intl.dart';
 
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
@@ -34,10 +37,15 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
   Future<Map> _init(BuildContext context) async {
 
     Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
 
     AppStrings appStrings = await languageInitializer.initLanguage();
 
-    return {"appStrings": appStrings, "hiveBox": processedImagesDatabase};
+    return {
+      "appStrings": appStrings,
+      "processedImagesDatabase": processedImagesDatabase,
+      "diseaseInfoDatabase": diseaseInfoDatabase
+    };
   }
 
   Widget _buildFunction(BuildContext context, AsyncSnapshot snapshot) {
@@ -47,7 +55,8 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
     if(snapshot.hasData) {
 
       appStrings = snapshot.data["appStrings"];
-      Box<ProcessedImage> processedImagesDatabase = snapshot.data["hiveBox"];
+      Box<ProcessedImage> processedImagesDatabase = snapshot.data["processedImagesDatabase"];
+      Box<DiseaseInfo> diseaseInfoDatabase = snapshot.data["diseaseInfoDatabase"];
 
       child = Scaffold(
 
@@ -92,19 +101,10 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
 
                 int key = imagesList[index];
                 ProcessedImage? processedImage = processedImagesDatabase.get(key);
-                Image loadedImage = Image.file(File(processedImage!.imagePath));
+                DiseaseInfo? diseaseInfo = diseaseInfoDatabase.get(processedImage!.diseaseID);
 
-                return InkWell(
-                  onTap: () {},
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(6),
-                      child: Container(
-                        child: loadedImage,
-                      )
-                    ),
-                  ),
-                );
+                // PROCESSED IMAGE CARD
+                return ProcessedImageCard(processedImage, diseaseInfo!, appStrings!.languageID);
               },
               separatorBuilder: (context, index) => Divider(),
               itemCount: imagesList.length

@@ -36,6 +36,7 @@ dependencies:
   hive_flutter: ^1.1.0
   dio: ^4.0.1
   connectivity_plus: ^2.0.2
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

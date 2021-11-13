@@ -19,6 +19,7 @@ class ProcessedImageAdapter extends TypeAdapter<ProcessedImage> {
     return ProcessedImage(
       imagePath: fields[0] as String,
       diseaseID: fields[1] as String,
+      epochSeconds: fields[2] as int,
     );
   }
 

@@ -40,10 +40,10 @@ class _ImageDetailsState extends State<ImageDetails> {
 
     Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
     processedImagesDatabase.add(ProcessedImage(
-        imagePath: filePath,
-        diseaseID: diseaseID
+      imagePath: filePath,
+      diseaseID: diseaseID,
+      epochSeconds: DateTime.now().millisecondsSinceEpoch
     ));
-
     AppStrings appStrings = await languageInitializer.initLanguage();
 
     return {"appStrings": appStrings};

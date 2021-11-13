@@ -10,8 +10,12 @@ class ProcessedImage {
   @HiveField(1)
   String diseaseID;
 
+  @HiveField(2)
+  int epochSeconds;
+
   ProcessedImage({
     required this.imagePath,
-    required this.diseaseID
+    required this.diseaseID,
+    required this.epochSeconds
   });
 }

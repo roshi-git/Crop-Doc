@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/screens/processed_image_card.dart';
-import 'package:intl/intl.dart';
 
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
@@ -91,11 +89,13 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
           title: Text(appStrings!.imageLibrary),
           backgroundColor: AppColor.appBarColorLight,
         ),
+
+        // PROCESSED IMAGES LIST
         body: ValueListenableBuilder(
           valueListenable: processedImagesDatabase.listenable(),
           builder: (BuildContext context, value, Widget? child) {
 
-            List<int> imagesList = processedImagesDatabase.keys.cast<int>().toList();
+            List<int> imagesList = processedImagesDatabase.keys.cast<int>().toList().reversed.toList();
             return ListView.separated(
               itemBuilder: (context, index) {
 

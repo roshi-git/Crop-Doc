@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/screens/about.dart';
@@ -42,7 +43,14 @@ void main() async {
   Hive.registerAdapter(DiseaseInfoAdapter());
   Hive.openBox<DiseaseInfo>("diseaseInfo");
 
-  await fetchPlantInfo(appDirectory);
+  // CHECK INTERNET CONNECTIVITY
+  Connectivity connectivity = Connectivity();
+  ConnectivityResult connectivityResult = await connectivity.checkConnectivity();
+  // IF THERE IS INTERNET CONNECTION
+  // FETCH DATA FROM FIREBASE
+  if(connectivityResult != ConnectivityResult.none) {
+    await fetchPlantInfo(appDirectory);
+  }
 
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,

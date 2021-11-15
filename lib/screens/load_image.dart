@@ -125,7 +125,7 @@ class _LoadImageState extends State<LoadImage> {
             ElevatedButton(
               onPressed: () async {
                 if(loadedImage != null)
-                  await Navigator.pushNamed(context, "/examine_leaf", arguments: {"filePath": filePath!});
+                  await Navigator.pushReplacementNamed(context, "/examine_leaf", arguments: {"filePath": filePath!});
               },
               style: ElevatedButton.styleFrom(
                   primary: examineLeafButtonColor,

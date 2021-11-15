@@ -90,10 +90,12 @@ class _CaptureImageState extends State<CaptureImage> {
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
-              child: Container(
-                child: loadedImage,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
+                child: Container(
+                  child: loadedImage,
+                ),
               ),
             ),
 

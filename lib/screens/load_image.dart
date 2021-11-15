@@ -22,7 +22,7 @@ class _LoadImageState extends State<LoadImage> {
 
   Color examineLeafButtonColor = AppColor.disabledButtonColorLight;
 
-  double fontSize = 20;
+  double fontSize = 17;
 
   AppStrings? appStrings;
 
@@ -92,14 +92,16 @@ class _LoadImageState extends State<LoadImage> {
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
-              child: Container(
-                child: loadedImage,
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 24, right: 24, top: 24),
+                child: Container(
+                  child: loadedImage,
+                ),
               ),
             ),
 
-            Spacer(),
+            SizedBox(height: 30),
 
             // LOAD ANOTHER IMAGE
             ElevatedButton(
@@ -108,7 +110,7 @@ class _LoadImageState extends State<LoadImage> {
               },
               style: ElevatedButton.styleFrom(
                   primary: AppColor.buttonColorLight,
-                  fixedSize: Size(270, 54)
+                  fixedSize: Size(180, 42)
               ),
               child: Text(
                 appStrings!.selectDifferentImage,
@@ -129,7 +131,7 @@ class _LoadImageState extends State<LoadImage> {
               },
               style: ElevatedButton.styleFrom(
                   primary: examineLeafButtonColor,
-                  fixedSize: Size(270, 54)
+                  fixedSize: Size(180, 42)
               ),
               child: Text(
                 appStrings!.examineLeaf,

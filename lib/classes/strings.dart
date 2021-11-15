@@ -9,7 +9,7 @@ class AppStrings {
   String diseasesLibrary = "Diseases Library";
   String about = "About";
   String retakeImage = "Re-take";
-  String selectDifferentImage = "Select a Different Image";
+  String selectDifferentImage = "Select an Image";
   String examineLeaf = "Examine Leaf";
   String detectingLeaves = "Detecting Leaves";
   String detectingDiseases = "Detecting Diseases";

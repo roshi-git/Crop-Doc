@@ -40,8 +40,8 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     String diseaseID;
 
     // CHECK IF DISEASE IS RELATED TO TOMATO
-    if(index < 28 || index == 37)
-      diseaseID = "none";
+    if(index < 28)
+      diseaseID = "unknown";
     else
       diseaseID = DiseaseIDMap.diseaseIDMap[index];
 
@@ -110,7 +110,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
 
   @override
   Widget build(BuildContext context) {
-    
+
     return FutureBuilder(
       future: _init(context),
       builder: _builderFunction

@@ -37,6 +37,7 @@ dependencies:
   dio: ^4.0.1
   connectivity_plus: ^2.0.2
   intl: ^0.17.0
+  tflite: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +66,8 @@ flutter:
     - assets/captured_images_icon.png
     - assets/diseases_library_icon.png
     - assets/image_gallery_icon.png
+    - assets/model/labels.txt
+    - assets/model/simple_model.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

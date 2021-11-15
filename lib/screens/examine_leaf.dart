@@ -1,9 +1,11 @@
 import 'package:crop_doctor/classes/colors.dart';
+import 'package:crop_doctor/classes/disease_id_map.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:tflite/tflite.dart';
 
 class ExamineLeaf extends StatefulWidget {
   @override
@@ -12,28 +14,83 @@ class ExamineLeaf extends StatefulWidget {
 
 class _ExamineLeafState extends State<ExamineLeaf> {
 
-  String? languageID;
-  String currentTask = "Processing image";
+  // LOAD THE ML MODEL
+  Future<void> loadModel() async {
+    var result = await Tflite.loadModel(
+        model: "assets/model/simple_model.tflite",
+        labels: "assets/model/labels.txt"
+    );
 
-  AppStrings? appStrings;
+    print(result);
+  }
 
-  LanguageInitializer languageInitializer = LanguageInitializer();
+  void predictClass(String imagePath) async {
+
+    // PREDICT CLASS OF DISEASE
+    List? result = await Tflite.runModelOnImage(
+      path: imagePath,
+      threshold: 0.5,
+      imageMean: 127.5,
+      imageStd: 127.5,
+      numResults: 2
+    );
+    print(result);
+
+    int index = result![0]["index"];
+    String diseaseID;
+
+    // CHECK IF DISEASE IS RELATED TO TOMATO
+    if(index < 28 || index == 37)
+      diseaseID = "none";
+    else
+      diseaseID = DiseaseIDMap.diseaseIDMap[index];
+
+    // STORE DISEASE INFO
+    Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    processedImagesDatabase.add(ProcessedImage(
+        imagePath: imagePath,
+        diseaseID: diseaseID,
+        epochSeconds: DateTime.now().millisecondsSinceEpoch
+    ));
+
+    var arguments = {
+      "filePath": imagePath,
+      "diseaseID": diseaseID,
+    };
+    Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
+  }
+
+  Future<Map> _init(BuildContext context) async {
+
+    var arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    String imagePath = arguments["filePath"];
+
+    await loadModel();
+
+    LanguageInitializer languageInitializer = LanguageInitializer();
+    AppStrings appStrings = await languageInitializer.initLanguage();
+
+    return {"appStrings": appStrings, "imagePath": imagePath};
+  }
 
   Widget _builderFunction(BuildContext context, AsyncSnapshot snapshot) {
 
     Widget child;
 
     if(snapshot.hasData) {
-      appStrings = snapshot.data;
+      AppStrings appStrings = snapshot.data["appStrings"];
+      String imagePath = snapshot.data["imagePath"];
+
+      predictClass(imagePath);
 
       child = Scaffold(
         appBar: AppBar(
           backgroundColor: AppColor.appBarColorLight,
-          title: Text(appStrings!.examineLeaf),
+          title: Text(appStrings.examineLeaf),
         ),
         body: Center(
           child: Text(
-            currentTask,
+            "Predicting diseases...",
             style: TextStyle(
               fontSize: 17,
             ),
@@ -44,7 +101,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     else
       child = Center(
         child: Text(
-          "Loading.."
+          "Loading model..."
         ),
       );
 
@@ -54,29 +111,29 @@ class _ExamineLeafState extends State<ExamineLeaf> {
   @override
   Widget build(BuildContext context) {
 
-    var arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    String filePath = arguments["filePath"];
-    String diseaseID = "disease 01";
-
-    Future.delayed(Duration(seconds: 3), () {
-
-      Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
-      processedImagesDatabase.add(ProcessedImage(
-          imagePath: filePath,
-          diseaseID: diseaseID,
-          epochSeconds: DateTime.now().millisecondsSinceEpoch
-      ));
-
-      var arguments = {
-        "filePath": filePath,
-        "diseaseID": diseaseID,
-      };
-
-      Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
-    });
+    // var arguments = ModalRoute.of(context)!.settings.arguments as Map;
+    // String filePath = arguments["filePath"];
+    // String diseaseID = "disease 01";
+    //
+    // Future.delayed(Duration(seconds: 3), () {
+    //
+    //   Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    //   processedImagesDatabase.add(ProcessedImage(
+    //       imagePath: filePath,
+    //       diseaseID: diseaseID,
+    //       epochSeconds: DateTime.now().millisecondsSinceEpoch
+    //   ));
+    //
+    //   var arguments = {
+    //     "filePath": filePath,
+    //     "diseaseID": diseaseID,
+    //   };
+    //
+    //   Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
+    // });
 
     return FutureBuilder(
-      future: languageInitializer.initLanguage(),
+      future: _init(context),
       builder: _builderFunction
     );
   }

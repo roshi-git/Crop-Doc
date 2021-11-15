@@ -110,28 +110,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
 
   @override
   Widget build(BuildContext context) {
-
-    // var arguments = ModalRoute.of(context)!.settings.arguments as Map;
-    // String filePath = arguments["filePath"];
-    // String diseaseID = "disease 01";
-    //
-    // Future.delayed(Duration(seconds: 3), () {
-    //
-    //   Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
-    //   processedImagesDatabase.add(ProcessedImage(
-    //       imagePath: filePath,
-    //       diseaseID: diseaseID,
-    //       epochSeconds: DateTime.now().millisecondsSinceEpoch
-    //   ));
-    //
-    //   var arguments = {
-    //     "filePath": filePath,
-    //     "diseaseID": diseaseID,
-    //   };
-    //
-    //   Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
-    // });
-
+    
     return FutureBuilder(
       future: _init(context),
       builder: _builderFunction

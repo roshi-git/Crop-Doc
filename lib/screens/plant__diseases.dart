@@ -1,5 +1,4 @@
 import 'package:crop_doctor/classes/colors.dart';
-import 'package:crop_doctor/classes/disease.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
@@ -37,9 +36,9 @@ class _PlantDiseasesState extends State<PlantDiseases> {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
     String plantID = args["plantID"];
 
-    Box<List<Disease>> diseaseListDatabase = Hive.box<List<Disease>>("diseases");
+    Box<List<String>> diseaseListDatabase = Hive.box<List<String>>("diseases");
+    List<String>? diseasesList = diseaseListDatabase.get(plantID);
     Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
-    List<Disease>? diseasesList = diseaseListDatabase.get(plantID);
 
     // INIT SCREEN LANGUAGE
     AppStrings appStrings = await languageInitializer.initLanguage();
@@ -54,7 +53,7 @@ class _PlantDiseasesState extends State<PlantDiseases> {
     if(snapshot.hasData) {
 
       appStrings = snapshot.data["appStrings"];
-      List<Disease> diseasesList = snapshot.data["diseasesList"];
+      List<String> diseasesList = snapshot.data["diseasesList"];
       Box<DiseaseInfo> diseaseInfoDatabase = snapshot.data["diseasesInfoBox"];
 
       child = Scaffold(
@@ -90,14 +89,22 @@ class _PlantDiseasesState extends State<PlantDiseases> {
             itemCount: diseasesList.length,
             itemBuilder: (context, index) {
               return DiseaseCard(
-                diseasesList[index],
+                diseaseInfoDatabase.get(diseasesList[index])!,
                 appStrings!.languageID,
-                diseaseInfoDatabase.get(diseasesList[index].diseaseID)!.diseaseImagePath
+                diseaseInfoDatabase.get(diseasesList[index])!.diseaseImagePath
               );
             }),
         ),
       );
     }
+    else if(snapshot.data == null)
+      child = Scaffold(
+        body: Center(
+          child: Text(
+              "data null..."
+          ),
+        ),
+      );
     else
       child = Scaffold(
         body: Center(

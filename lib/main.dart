@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'classes/disease.dart';
 import 'classes/plant_info.dart';
 
 void main() async {
@@ -37,8 +36,8 @@ void main() async {
   Hive.registerAdapter(PlantInfoAdapter());
   await Hive.openBox<PlantInfo>("plantInfo");
 
-  Hive.registerAdapter(DiseaseAdapter());
-  await Hive.openBox<List<Disease>>("diseases");
+  //Hive.registerAdapter(DiseaseAdapter());
+  await Hive.openBox<List<String>>("diseases");
 
   Hive.registerAdapter(DiseaseInfoAdapter());
   await Hive.openBox<DiseaseInfo>("diseaseInfo");
@@ -88,12 +87,28 @@ void main() async {
   // CHECK INTERNET CONNECTIVITY
   Connectivity connectivity = Connectivity();
   ConnectivityResult connectivityResult = await connectivity.checkConnectivity();
+
   // IF THERE IS INTERNET CONNECTION
   // FETCH DATA FROM FIREBASE
   if(connectivityResult != ConnectivityResult.none) {
-    await fetchPlantInfo(appDirectory);
+
+    // CHECK WHEN THE DATABASE WAS LAST UPDATED
+    await Firebase.initializeApp();
+    DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("last_updated");
+    var value;
+    await dbRef.get().then((snapshot) => value = snapshot.value);
+    var lastUpdated = appStates.get("last_updated");
+
+    if(lastUpdated == null || lastUpdated < value) {
+      appStates.put("last_updated", value);
+
+      // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
+      await fetchPlantInfo(appDirectory);
+    }
+
     if(firstLaunch)
       appStates.put("firstLaunch", false);
+
     _runApp = materialApp;
   }
   else {
@@ -115,7 +130,7 @@ Future<void> fetchPlantInfo(var appDirectory) async {
   await dbRef.get().then((snapshot) => values = snapshot.value);
 
   Box<PlantInfo> plantInfoDatabase = Hive.box<PlantInfo>("plantInfo");
-  Box<List<Disease>> diseaseListDatabase = Hive.box<List<Disease>>("diseases");
+  Box<List<String>> diseaseListDatabase = Hive.box<List<String>>("diseases");
   Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
 
   for(String plant in values.keys) {
@@ -156,16 +171,16 @@ Future<void> fetchPlantInfo(var appDirectory) async {
 
     var diseasesList = await fetchDiseasesList(plant);
     diseaseListDatabase.put(plant, diseasesList);
-    for(Disease disease in diseasesList) {
-      DiseaseInfo diseaseInfo = await fetchDiseaseInfo(appDirectory, disease.diseaseID);
-      diseaseInfoDatabase.put(disease.diseaseID, diseaseInfo);
+    for(String disease in diseasesList) {
+      DiseaseInfo diseaseInfo = await fetchDiseaseInfo(appDirectory, disease);
+      diseaseInfoDatabase.put(disease, diseaseInfo);
     }
   }
 
   print("Plants list fetched");
 }
 
-Future<List<Disease>> fetchDiseasesList(String plantID) async {
+Future<List<String>> fetchDiseasesList(String plantID) async {
 
   // GET DISEASES NAMES AND STUFF FROM FIREBASE RTDB
   await Firebase.initializeApp();
@@ -173,17 +188,9 @@ Future<List<Disease>> fetchDiseasesList(String plantID) async {
   var values;
   await dbRef.get().then((snapshot) => values = snapshot.value);
 
-  List<Disease> diseasesList = [];
-  for(String disease in values.keys) {
-
-    Disease diseases = Disease(
-        diseaseID: disease,
-        diseaseNameEN: values[disease]["diseaseNameEN"],
-        diseaseNameHI: values[disease]["diseaseNameHI"],
-    );
-
-    diseasesList.add(diseases);
-  }
+  List<String> diseasesList = [];
+  for(String disease in values.keys)
+    diseasesList.add(disease);
 
   print("Diseases list fetched");
   return diseasesList;

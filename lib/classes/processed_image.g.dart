@@ -26,11 +26,13 @@ class ProcessedImageAdapter extends TypeAdapter<ProcessedImage> {
   @override
   void write(BinaryWriter writer, ProcessedImage obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.imagePath)
       ..writeByte(1)
-      ..write(obj.diseaseID);
+      ..write(obj.diseaseID)
+      ..writeByte(2)
+      ..write(obj.epochSeconds);
   }
 
   @override

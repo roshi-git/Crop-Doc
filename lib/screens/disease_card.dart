@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:crop_doctor/classes/disease.dart';
+import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:flutter/material.dart';
 
 class DiseaseCard extends StatelessWidget {
 
-  final Disease disease;
+  final DiseaseInfo disease;
   final String languageID;
   final String imagePath;
 

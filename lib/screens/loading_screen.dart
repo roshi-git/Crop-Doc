@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
 import 'package:crop_doctor/classes/plant_info.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
@@ -184,10 +185,11 @@ class _SplashScreen extends State<SplashScreen> {
       var lastUpdated = appStates.get("last_updated");
 
       if(lastUpdated == null || lastUpdated < value) {
-        appStates.put("last_updated", value);
 
         // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
         await fetchPlantInfo();
+
+        appStates.put("last_updated", value);
       }
 
       if(firstLaunch)
@@ -201,7 +203,19 @@ class _SplashScreen extends State<SplashScreen> {
 
     return Scaffold(
       body: Center(
-        child: Text("Loading text..")
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              backgroundColor: AppColor.themeColorLight,
+              valueColor: AlwaysStoppedAnimation(AppColor.buttonColorLight),
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: Text("Loading the app")
+            ),
+          ],
+        ),
       ),
     );
   }

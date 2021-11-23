@@ -8,7 +8,7 @@ import 'package:crop_doctor/screens/capture_image.dart';
 import 'package:crop_doctor/screens/home.dart';
 import 'package:crop_doctor/screens/load_image.dart';
 import 'package:crop_doctor/screens/plant__diseases.dart';
-import 'package:crop_doctor/screens/splash.dart';
+import 'package:crop_doctor/screens/loading_screen.dart';
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';

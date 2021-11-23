@@ -20,8 +20,25 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreen extends State<SplashScreen> {
 
-  String currentTask = "Loading the app";
+
+  @override
+  void initState() {
+    setState(() {
+      print(currentTask[progress]);
+      progress = 0;
+    });
+
+    super.initState();
+  }
+
   int progress = 0;
+  Map<int, String> currentTask = {
+    0: "Loading local databases",
+    1: "Checking internet connectivity",
+    2: "Downloading plant info from cloud",
+    3: "Loading complete"
+  };
+
   double progressBarWidth = 80;
   double completeProgressBarWidth = 240;
 
@@ -149,11 +166,6 @@ class _SplashScreen extends State<SplashScreen> {
 
   Future<void> _init() async {
 
-    setState(() {
-      currentTask = "Loading local databases";
-      progress++;
-    });
-
     Hive.registerAdapter(ProcessedImageAdapter());
     await Hive.openBox<ProcessedImage>("processedImages");
 
@@ -179,6 +191,11 @@ class _SplashScreen extends State<SplashScreen> {
       appStates.put("firstLaunch", true);
     }
 
+    setState(() {
+      progress = 1;
+      print("${currentTask[progress]} - $progress");
+    });
+
     // CHECK INTERNET CONNECTIVITY
     Connectivity connectivity = Connectivity();
     ConnectivityResult connectivityResult = await connectivity.checkConnectivity();
@@ -186,11 +203,6 @@ class _SplashScreen extends State<SplashScreen> {
     // IF THERE IS INTERNET CONNECTION
     // FETCH DATA FROM FIREBASE
     if(connectivityResult != ConnectivityResult.none) {
-
-      setState(() {
-        currentTask = "Checking internet connectivity";
-        progress = 1;
-      });
 
       // CHECK WHEN THE DATABASE WAS LAST UPDATED
       await Firebase.initializeApp();
@@ -202,8 +214,8 @@ class _SplashScreen extends State<SplashScreen> {
       if(lastUpdated == null || lastUpdated < value) {
 
         setState(() {
-          currentTask = "Fetching info from cloud";
           progress = 2;
+          print("${currentTask[progress]} - $progress");
         });
         // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
         await fetchPlantInfo();
@@ -214,6 +226,11 @@ class _SplashScreen extends State<SplashScreen> {
       if(firstLaunch)
         appStates.put("firstLaunch", false);
     }
+
+    setState(() {
+      progress = 3;
+      print("${currentTask[progress]} - $progress");
+    });
 
     print("Initialization complete");
   }
@@ -247,7 +264,7 @@ class _SplashScreen extends State<SplashScreen> {
             ),
             SizedBox(height:30),
             Text(
-              currentTask,
+              currentTask[progress]!,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,

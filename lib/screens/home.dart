@@ -2,6 +2,7 @@ import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/strings.dart';
 import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
+
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:flutter/widgets.dart';
@@ -13,11 +14,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {

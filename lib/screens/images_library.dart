@@ -32,7 +32,7 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
-  Future<Map> _init(BuildContext context) async {
+  Future<Map> _init() async {
 
     Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
     Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
@@ -129,7 +129,7 @@ class _ImagesLibraryState extends State<ImagesLibrary> {
   Widget build(BuildContext context) {
 
     return FutureBuilder(
-      future: _init(context),
+      future: _init(),
       builder: _buildFunction
     );
   }

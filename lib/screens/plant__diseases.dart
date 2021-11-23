@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class PlantDiseases extends StatefulWidget {
-  const PlantDiseases({Key? key}) : super(key: key);
 
   @override
   _PlantDiseasesState createState() => _PlantDiseasesState();
@@ -97,14 +96,6 @@ class _PlantDiseasesState extends State<PlantDiseases> {
         ),
       );
     }
-    else if(snapshot.data == null)
-      child = Scaffold(
-        body: Center(
-          child: Text(
-              "data null..."
-          ),
-        ),
-      );
     else
       child = Scaffold(
         body: Center(

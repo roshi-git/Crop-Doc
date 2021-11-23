@@ -36,12 +36,10 @@ void main() async {
   Hive.registerAdapter(PlantInfoAdapter());
   await Hive.openBox<PlantInfo>("plantInfo");
 
-  //Hive.registerAdapter(DiseaseAdapter());
-  await Hive.openBox<List<String>>("diseases");
-
   Hive.registerAdapter(DiseaseInfoAdapter());
   await Hive.openBox<DiseaseInfo>("diseaseInfo");
 
+  await Hive.openBox<List<String>>("diseases");
   await Hive.openBox("appStates");
 
   Box appStates = Hive.box("appStates");

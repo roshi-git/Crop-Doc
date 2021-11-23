@@ -5,7 +5,7 @@ import 'package:hive/hive.dart';
 
 class LanguageInitializer {
 
-    Box appStates = Hive.box("appStates");
+  Box appStates = Hive.box("appStates");
 
   void setLanguage(String languageID) {
     appStates.put("languageID", languageID);

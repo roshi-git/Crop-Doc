@@ -5,6 +5,7 @@ import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -12,6 +13,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    Hive.close();
+    super.dispose();
+  }
 
   Color buttonColor = AppColor.buttonColorLight;
   double buttonFontSize = 28;

@@ -75,7 +75,10 @@ class _HomeState extends State<Home> {
           // BACKGROUND IMAGE
           Container(
             decoration: BoxDecoration(
-                image: DecorationImage(image: AssetImage("assets/BG.png"))),
+              image: DecorationImage(
+                image: AssetImage("assets/BG.png")
+              )
+            ),
           ),
 
           // BUTTONS AND STUFF
@@ -101,18 +104,24 @@ class _HomeState extends State<Home> {
                     ),
                     label: Align(
                       alignment: Alignment.center,
-                      child: Text(appStrings!.captureImage,
-                          textAlign: TextAlign.center),
+                      child: Text(
+                        appStrings!.captureImage,
+                        textAlign: TextAlign.center
+                      ),
                     ),
                     style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(buttonRadius))),
-                        primary: buttonColor,
-                        fixedSize: Size(buttonWidth, buttonHeight),
-                        textStyle: TextStyle(
-                            fontSize: buttonFontSize,
-                            fontWeight: FontWeight.bold)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(buttonRadius)
+                        )
+                      ),
+                      primary: buttonColor,
+                      fixedSize: Size(buttonWidth, buttonHeight),
+                      textStyle: TextStyle(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
                   ),
 
                   SizedBox(height: 24),
@@ -138,14 +147,17 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(buttonRadius))),
-                        primary: buttonColor,
-                        fixedSize: Size(buttonWidth, buttonHeight),
-                        textStyle: TextStyle(
-                            fontSize: buttonFontSize,
-                            fontWeight: FontWeight.bold)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(buttonRadius)
+                        )
+                      ),
+                      primary: buttonColor,
+                      fixedSize: Size(buttonWidth, buttonHeight),
+                      textStyle: TextStyle(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.bold)
+                    ),
                   ),
 
                   SizedBox(height: 24),
@@ -171,14 +183,18 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(buttonRadius))),
-                        primary: buttonColor,
-                        fixedSize: Size(buttonWidth, buttonHeight),
-                        textStyle: TextStyle(
-                            fontSize: buttonFontSize,
-                            fontWeight: FontWeight.bold)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(buttonRadius)
+                        )
+                      ),
+                      primary: buttonColor,
+                      fixedSize: Size(buttonWidth, buttonHeight),
+                      textStyle: TextStyle(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
                   ),
 
                   SizedBox(height: 24),
@@ -204,14 +220,18 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(buttonRadius))),
-                        primary: buttonColor,
-                        fixedSize: Size(buttonWidth, buttonHeight),
-                        textStyle: TextStyle(
-                            fontSize: buttonFontSize,
-                            fontWeight: FontWeight.bold)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(buttonRadius)
+                        )
+                      ),
+                      primary: buttonColor,
+                      fixedSize: Size(buttonWidth, buttonHeight),
+                      textStyle: TextStyle(
+                        fontSize: buttonFontSize,
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
                   ),
 
                   SizedBox(height: 24),
@@ -225,11 +245,14 @@ class _HomeState extends State<Home> {
                         await Navigator.pushNamed(context, "/about");
                         setState(() {});
                       },
-                      child: Text(appStrings!.about,
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: buttonColor)),
+                      child: Text(
+                        appStrings!.about,
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: buttonColor
+                        )
+                      ),
                     ),
                   ),
                 ],

@@ -20,6 +20,11 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreen extends State<SplashScreen> {
 
+  String currentTask = "Loading the app";
+  int progress = 0;
+  double progressBarWidth = 80;
+  double completeProgressBarWidth = 240;
+
   Future<void> fetchPlantInfo() async {
 
     final appDirectory = await getApplicationDocumentsDirectory();
@@ -144,6 +149,11 @@ class _SplashScreen extends State<SplashScreen> {
 
   Future<void> _init() async {
 
+    setState(() {
+      currentTask = "Loading local databases";
+      progress++;
+    });
+
     Hive.registerAdapter(ProcessedImageAdapter());
     await Hive.openBox<ProcessedImage>("processedImages");
 
@@ -177,6 +187,11 @@ class _SplashScreen extends State<SplashScreen> {
     // FETCH DATA FROM FIREBASE
     if(connectivityResult != ConnectivityResult.none) {
 
+      setState(() {
+        currentTask = "Checking internet connectivity";
+        progress = 1;
+      });
+
       // CHECK WHEN THE DATABASE WAS LAST UPDATED
       await Firebase.initializeApp();
       DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("last_updated");
@@ -186,6 +201,10 @@ class _SplashScreen extends State<SplashScreen> {
 
       if(lastUpdated == null || lastUpdated < value) {
 
+        setState(() {
+          currentTask = "Fetching info from cloud";
+          progress = 2;
+        });
         // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
         await fetchPlantInfo();
 
@@ -206,14 +225,35 @@ class _SplashScreen extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              backgroundColor: AppColor.themeColorLight,
-              valueColor: AlwaysStoppedAnimation(AppColor.buttonColorLight),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Container(
+                    color: AppColor.themeColorLight,
+                    height: 10,
+                    width: completeProgressBarWidth,
+                  ),
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Container(
+                    color: AppColor.appBarColorLight,
+                    height: 10,
+                    width: progress * progressBarWidth,
+                  ),
+                )
+              ],
             ),
-            SizedBox(height: 20),
-            Center(
-              child: Text("Loading the app")
-            ),
+            SizedBox(height:30),
+            Text(
+              currentTask,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: AppColor.buttonColorLight
+              )
+            )
           ],
         ),
       ),

@@ -158,10 +158,6 @@ class _ExamineLeafState extends State<ExamineLeaf> {
 
     if(snapshot.hasData) {
       AppStrings appStrings = snapshot.data["appStrings"];
-      String imagePath = snapshot.data["imagePath"];
-
-      //predictClass(imagePath);
-
       child = Scaffold(
         appBar: AppBar(
           backgroundColor: AppColor.appBarColorLight,

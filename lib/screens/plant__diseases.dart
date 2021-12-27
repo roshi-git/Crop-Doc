@@ -37,6 +37,9 @@ class _PlantDiseasesState extends State<PlantDiseases> {
 
     Box<List<String>> diseaseListDatabase = Hive.box<List<String>>("diseases");
     List<String>? diseasesList = diseaseListDatabase.get(plantID);
+    diseasesList!.remove("unknown");
+    diseasesList.remove("disease 00");
+
     Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
 
     // INIT SCREEN LANGUAGE

@@ -1,11 +1,17 @@
+import 'dart:io';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease_id_map.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:tflite/tflite.dart';
+import 'package:http/http.dart' as http;
 
 class ExamineLeaf extends StatefulWidget {
   @override
@@ -24,6 +30,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     print(result);
   }
 
+  // PREDICT CLASS OF THE DISEASE LOCALLY
   void predictClass(String imagePath) async {
 
     // PREDICT CLASS OF DISEASE
@@ -60,13 +67,76 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
   }
 
+  // PREDICT CLASS OF THE DISEASE ON THE SERVER
+  void predictClassOnline(String fileURL) async {
+
+  }
+
+  // UPLOAD IMAGE TO FIREBASE STORAGE
+  Future<String> uploadFile(File file) async {
+
+    UploadTask uploadTask;
+
+    FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+    Reference ref = firebaseStorage.ref()
+        .child("processed_images")
+        .child("${DateTime.now().millisecondsSinceEpoch}.jpg");
+
+    uploadTask = ref.putFile(file);
+
+    var downloadURL;
+    await uploadTask.whenComplete(() async {
+      try{
+        downloadURL = await ref.getDownloadURL();
+      }catch(onError){
+        print("Error");
+      }
+    });
+
+    return downloadURL.toString();
+  }
+
   Future<Map> _init(BuildContext context) async {
 
     var arguments = ModalRoute.of(context)!.settings.arguments as Map;
     String imagePath = arguments["filePath"];
 
-    await loadModel();
+    // CHECK INTERNET CONNECTIVITY
+    Connectivity connectivity = Connectivity();
+    ConnectivityResult connectivityResult = await connectivity.checkConnectivity();
 
+    // IF THERE IS INTERNET CONNECTION
+    // UPLOAD IMAGE TO FIREBASE STORAGE
+    if(connectivityResult != ConnectivityResult.none) {
+
+      // UPLOAD IMAGE TO FIREBASE STORAGE
+      String fileURL = await uploadFile(File(imagePath));
+      print(fileURL);
+
+      // GET ML SERVER LINK FROM FIREBASE RTDB
+      DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("server_url");
+      var serverURLString;
+      await dbRef.get().then((snapshot) => serverURLString = snapshot.value);
+      var serverURL = Uri.parse(serverURLString);
+
+      // SEND DOWNLOAD LINK TO ML SERVER
+      // var body = {"imageURL": fileURL};
+      var body = {'name': 'doodle', 'color': 'blue'};
+      var response = await http.post(serverURL, body: body);
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      // RESPONSE CONTAINS THE LINK OF THE CLASSIFIED IMAGE
+      // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
+    }
+    else {
+      // PREDICT USING LOCAL ML MODEL
+      await loadModel();
+      predictClass(imagePath);
+    }
+
+    await loadModel();
     LanguageInitializer languageInitializer = LanguageInitializer();
     AppStrings appStrings = await languageInitializer.initLanguage();
 
@@ -99,9 +169,11 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       );
     }
     else
-      child = Center(
-        child: Text(
-          "Loading model..."
+      child = Scaffold(
+        body: Center(
+          child: Text(
+            "Loading model..."
+          ),
         ),
       );
 

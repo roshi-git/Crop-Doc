@@ -109,26 +109,36 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     // UPLOAD IMAGE TO FIREBASE STORAGE
     if(connectivityResult != ConnectivityResult.none) {
 
-      // UPLOAD IMAGE TO FIREBASE STORAGE
-      String fileURL = await uploadFile(File(imagePath));
-      print(fileURL);
-
       // GET ML SERVER LINK FROM FIREBASE RTDB
       DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("server_url");
       var serverURLString;
       await dbRef.get().then((snapshot) => serverURLString = snapshot.value);
       var serverURL = Uri.parse(serverURLString);
 
-      // SEND DOWNLOAD LINK TO ML SERVER
-      // var body = {"imageURL": fileURL};
-      var body = {'name': 'doodle', 'color': 'blue'};
-      var response = await http.post(serverURL, body: body);
+      // CHECK IF ML SERVER IS UP
+      var serverUpResponse = await http.get(serverURL);
+      if(serverUpResponse.statusCode == 200) {
+        // UPLOAD IMAGE TO FIREBASE STORAGE
+        String fileURL = await uploadFile(File(imagePath));
+        print(fileURL);
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+        // SEND DOWNLOAD LINK TO ML SERVER
+        // var body = {"imageURL": fileURL};
+        var body = {'name': 'doodle', 'color': 'blue'};
+        var serverPredictionResponse = await http.post(serverURL, body: body);
 
-      // RESPONSE CONTAINS THE LINK OF THE CLASSIFIED IMAGE
-      // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
+        print('Server prediction response status: ${serverPredictionResponse.statusCode}');
+
+        // RESPONSE CONTAINS THE LINK OF THE CLASSIFIED IMAGE
+        // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
+      }
+      else {
+        print('Server response status: ${serverUpResponse.statusCode}');
+
+        // PREDICT USING LOCAL ML MODEL
+        await loadModel();
+        predictClass(imagePath);
+      }
     }
     else {
       // PREDICT USING LOCAL ML MODEL
@@ -136,7 +146,6 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       predictClass(imagePath);
     }
 
-    await loadModel();
     LanguageInitializer languageInitializer = LanguageInitializer();
     AppStrings appStrings = await languageInitializer.initLanguage();
 
@@ -151,7 +160,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       AppStrings appStrings = snapshot.data["appStrings"];
       String imagePath = snapshot.data["imagePath"];
 
-      predictClass(imagePath);
+      //predictClass(imagePath);
 
       child = Scaffold(
         appBar: AppBar(

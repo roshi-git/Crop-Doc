@@ -220,7 +220,13 @@ class _SplashScreen extends State<SplashScreen> {
         // GET PLANT NAMES AND TYPES FROM FIREBASE RTDB
         await fetchPlantInfo();
 
-        appStates.put("last_updated", value);
+        // GET INFO ABOUT APP
+        dbRef = FirebaseDatabase.instance.reference().child("about");
+        var aboutTexts;
+        await dbRef.get().then((snapshot) => aboutTexts = snapshot.value);
+        for(String aboutText in aboutTexts.keys) {
+          appStates.put(aboutText, aboutTexts[aboutText]);
+        }
       }
 
       if(firstLaunch)

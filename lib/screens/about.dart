@@ -4,6 +4,7 @@ import 'package:crop_doctor/classes/stringsEN.dart';
 import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
+import 'package:hive/hive.dart';
 
 class About extends StatefulWidget {
   @override
@@ -26,13 +27,31 @@ class _AboutState extends State<About> {
 
   LanguageInitializer languageInitializer = LanguageInitializer();
 
+  Future<Map> _init() async {
+    AppStrings appStrings = await languageInitializer.initLanguage();
+    Box appStates = Hive.box("appStates");
+
+    return {"appStrings": appStrings, "appStates": appStates};
+  }
+
   Widget _builderFunction(BuildContext buildContext, AsyncSnapshot snapshot) {
 
     Widget child;
 
     if(snapshot.hasData) {
 
-      appStrings = snapshot.data;
+      appStrings = snapshot.data["appStrings"];
+      Box appStates = snapshot.data["appStates"];
+
+      String languageID = appStrings!.languageID;
+
+      String aboutText;
+      if(languageID == "EN") {
+        aboutText = appStates.get("aboutEN");
+      }
+      else {
+        aboutText = appStates.get("aboutHI");
+      }
 
       child = Scaffold(
         floatingActionButton: FloatingActionButton.extended(
@@ -62,6 +81,14 @@ class _AboutState extends State<About> {
           title: Text(appStrings!.about),
           backgroundColor: AppColor.appBarColorLight,
         ),
+        body: Center(
+          child: Text(
+            aboutText,
+            style: TextStyle(
+              fontSize: 17
+            ),
+          ),
+        ),
       );
     }
     else
@@ -77,7 +104,7 @@ class _AboutState extends State<About> {
   Widget build(BuildContext context) {
 
     return FutureBuilder(
-      future: languageInitializer.initLanguage(),
+      future: _init(),
       builder: _builderFunction
     );
   }

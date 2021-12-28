@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease_id_map.dart';
+import 'package:crop_doctor/classes/image_downloader.dart';
 import 'package:crop_doctor/classes/language_init.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:crop_doctor/classes/strings.dart';
@@ -11,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:tflite/tflite.dart';
+
 import 'package:http/http.dart' as http;
 
 class ExamineLeaf extends StatefulWidget {
@@ -30,8 +33,22 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     print(result);
   }
 
+
+  // STORE PREDICTED CLASS AND IMAGE
+  void storeDiseaseInfo(String imagePath, String diseaseID) {
+
+    // STORE DISEASE INFO
+    Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
+    processedImagesDatabase.add(ProcessedImage(
+        imagePath: imagePath,
+        diseaseID: diseaseID,
+        epochSeconds: DateTime.now().millisecondsSinceEpoch
+    ));
+  }
+
+
   // PREDICT CLASS OF THE DISEASE LOCALLY
-  void predictClass(String imagePath) async {
+  Future<Map<String, String>> predictClass(String imagePath) async {
 
     // PREDICT CLASS OF DISEASE
     List? result = await Tflite.runModelOnImage(
@@ -52,25 +69,55 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     else
       diseaseID = DiseaseIDMap.diseaseIDMap[index];
 
-    // STORE DISEASE INFO
-    Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
-    processedImagesDatabase.add(ProcessedImage(
-        imagePath: imagePath,
-        diseaseID: diseaseID,
-        epochSeconds: DateTime.now().millisecondsSinceEpoch
-    ));
-
-    var arguments = {
-      "filePath": imagePath,
-      "diseaseID": diseaseID,
+    return {
+      "imagePath": imagePath,
+      "prediction": diseaseID
     };
-    Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
   }
+
 
   // PREDICT CLASS OF THE DISEASE ON THE SERVER
-  void predictClassOnline(String fileURL) async {
+  Future<Map<String, dynamic>> predictClassOnline(Uri serverURL, String imagePath) async {
 
+    // CHECK IF ML SERVER IS UP
+    var serverUpResponse = await http.get(serverURL);
+    if(serverUpResponse.statusCode == 200) {
+
+      // UPLOAD IMAGE TO FIREBASE STORAGE
+      String fileURL = await uploadFile(File(imagePath));
+      print(fileURL);
+
+      // SEND DOWNLOAD LINK TO ML SERVER
+      var body = {"imageURL": fileURL};
+      var serverPredictionResponse = await http.post(serverURL, body: body);
+
+      print('Server prediction response status: ${serverPredictionResponse.statusCode}');
+
+      // RESPONSE CONTAINS THE LINK OF THE CLASSIFIED IMAGE
+      // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
+      Map<String, dynamic> responseData = jsonDecode(serverPredictionResponse.body);
+      String prediction = responseData["prediction"];
+      String outputImageLink = responseData["outputImageLink"];
+
+      ImageDownloader imageDownloader = ImageDownloader();
+
+      String downloadedImagePath = await imageDownloader.downloadImage(
+          DateTime.now().millisecondsSinceEpoch.toString(),
+          outputImageLink
+      );
+
+      return {
+        "statusCode": serverPredictionResponse.statusCode,
+        "imagePath": downloadedImagePath,
+        "prediction": prediction
+      };
+    }
+    else {
+      print('Server response status: ${serverUpResponse.statusCode}');
+      return {"statusCode": serverUpResponse.statusCode};
+    }
   }
+
 
   // UPLOAD IMAGE TO FIREBASE STORAGE
   Future<String> uploadFile(File file) async {
@@ -96,10 +143,12 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     return downloadURL.toString();
   }
 
+
   Future<Map> _init(BuildContext context) async {
 
     var arguments = ModalRoute.of(context)!.settings.arguments as Map;
     String imagePath = arguments["filePath"];
+    String prediction;
 
     // CHECK INTERNET CONNECTIVITY
     Connectivity connectivity = Connectivity();
@@ -115,36 +164,35 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       await dbRef.get().then((snapshot) => serverURLString = snapshot.value);
       var serverURL = Uri.parse(serverURLString);
 
-      // CHECK IF ML SERVER IS UP
-      var serverUpResponse = await http.get(serverURL);
-      if(serverUpResponse.statusCode == 200) {
-        // UPLOAD IMAGE TO FIREBASE STORAGE
-        String fileURL = await uploadFile(File(imagePath));
-        print(fileURL);
-
-        // SEND DOWNLOAD LINK TO ML SERVER
-        // var body = {"imageURL": fileURL};
-        var body = {'name': 'doodle', 'color': 'blue'};
-        var serverPredictionResponse = await http.post(serverURL, body: body);
-
-        print('Server prediction response status: ${serverPredictionResponse.statusCode}');
-
-        // RESPONSE CONTAINS THE LINK OF THE CLASSIFIED IMAGE
-        // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
-      }
-      else {
-        print('Server response status: ${serverUpResponse.statusCode}');
-
+      Map<String, dynamic> result = await predictClassOnline(serverURL, imagePath);
+      if(result["statusCode"] != 200) {
         // PREDICT USING LOCAL ML MODEL
         await loadModel();
-        predictClass(imagePath);
+        Map<String, String> _result = await predictClass(imagePath);
+        imagePath = _result["imagePath"]!;
+        prediction = _result["prediction"]!;
+        storeDiseaseInfo(imagePath, prediction);
+      }
+      else {
+        imagePath = result["imagePath"];
+        prediction = result["prediction"];
+        storeDiseaseInfo(imagePath, prediction);
       }
     }
     else {
       // PREDICT USING LOCAL ML MODEL
       await loadModel();
-      predictClass(imagePath);
+      Map<String, String> result = await predictClass(imagePath);
+      imagePath = result["imagePath"]!;
+      prediction = result["prediction"]!;
+      storeDiseaseInfo(imagePath, prediction);
     }
+
+    arguments = {
+      "filePath": imagePath,
+      "diseaseID": prediction,
+    };
+    Navigator.pushReplacementNamed(context, "/image_details", arguments: arguments);
 
     LanguageInitializer languageInitializer = LanguageInitializer();
     AppStrings appStrings = await languageInitializer.initLanguage();
@@ -152,11 +200,13 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     return {"appStrings": appStrings, "imagePath": imagePath};
   }
 
+
   Widget _builderFunction(BuildContext context, AsyncSnapshot snapshot) {
 
     Widget child;
 
     if(snapshot.hasData) {
+
       AppStrings appStrings = snapshot.data["appStrings"];
       child = Scaffold(
         appBar: AppBar(
@@ -177,13 +227,17 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       child = Scaffold(
         body: Center(
           child: Text(
-            "Loading model..."
+            "Predicting diseases...",
+            style: TextStyle(
+              fontSize: 17,
+            ),
           ),
         ),
       );
 
     return child;
   }
+
 
   @override
   Widget build(BuildContext context) {

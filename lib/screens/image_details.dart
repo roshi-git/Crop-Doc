@@ -92,7 +92,6 @@ class _ImageDetailsState extends State<ImageDetails> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              //Navigator.popUntil(context, ModalRoute.withName("/"));
               Navigator.pop(context);
             },
           ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:crop_doctor/classes/disease_info.dart';
+import 'package:crop_doctor/classes/image_downloader.dart';
 import 'package:crop_doctor/classes/plant_info.dart';
 import 'package:crop_doctor/classes/processed_image.dart';
 import 'package:dio/dio.dart';
@@ -56,30 +57,10 @@ class _SplashScreen extends State<SplashScreen> {
     Box<List<String>> diseaseListDatabase = Hive.box<List<String>>("diseases");
     Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");
 
+    ImageDownloader imageDownloader = ImageDownloader();
     for(String plant in values.keys) {
 
-      bool fileExists = await File("${appDirectory.path}/$plant.jpg").exists();
-      String imageDirectory = "${appDirectory.path}/$plant.jpg";
-
-      // IF PLANT IMAGE IS DOWNLOADED, NO NEED TO DOWNLOAD IMAGE
-      // OTHERWISE DOWNLOAD IMAGE AND STORE ITS PATH IN THE DB
-      if(!fileExists) {
-
-        File imageFile = File(imageDirectory);
-
-        var response = await Dio().get(
-            values[plant]["imageLink"],
-            options: Options(
-                responseType: ResponseType.bytes,
-                followRedirects: false,
-                receiveTimeout: 0
-            )
-        );
-
-        var raf = imageFile.openSync(mode: FileMode.write);
-        raf.writeFromSync(response.data);
-        await raf.close();
-      }
+      String imageDirectory = await imageDownloader.downloadImage(plant, values[plant]["imageLink"]);
 
       PlantInfo plantInfo = PlantInfo(
           plantID: plant,

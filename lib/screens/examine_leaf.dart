@@ -37,6 +37,8 @@ class _ExamineLeafState extends State<ExamineLeaf> {
   // STORE PREDICTED CLASS AND IMAGE
   void storeDiseaseInfo(String imagePath, String diseaseID) {
 
+    print("Storing disease info");
+
     // STORE DISEASE INFO
     Box<ProcessedImage> processedImagesDatabase = Hive.box<ProcessedImage>("processedImages");
     processedImagesDatabase.add(ProcessedImage(
@@ -79,17 +81,39 @@ class _ExamineLeafState extends State<ExamineLeaf> {
   // PREDICT CLASS OF THE DISEASE ON THE SERVER
   Future<Map<String, dynamic>> predictClassOnline(Uri serverURL, String imagePath) async {
 
+    print("Server IP Address:" + serverURL.toString());
+
     // CHECK IF ML SERVER IS UP
-    var serverUpResponse = await http.get(serverURL);
+    var serverUpResponse = await http.get(serverURL).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        print("Server timeout");
+        return http.Response('Error', 408);
+      },
+    );
+
     if(serverUpResponse.statusCode == 200) {
+
+      print("Server status: UP");
 
       // UPLOAD IMAGE TO FIREBASE STORAGE
       String fileURL = await uploadFile(File(imagePath));
       print(fileURL);
 
       // SEND DOWNLOAD LINK TO ML SERVER
-      var body = {"imageURL": fileURL};
-      var serverPredictionResponse = await http.post(serverURL, body: body);
+      var data = {"image_URL": fileURL};
+      var body = json.encode(data);
+      var serverPredictionResponse = await http.post(
+        serverURL,
+        headers: {"Content-Type": "application/json"},
+        body: body
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          print("Server prediction timeout");
+          return http.Response('Service not responding', 408);
+        },
+      );
 
       print('Server prediction response status: ${serverPredictionResponse.statusCode}');
 
@@ -97,7 +121,9 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       // USE THE LINK TO DOWNLOAD THE IMAGE AND CHANGE TO THE NEXT ACTIVITY
       Map<String, dynamic> responseData = jsonDecode(serverPredictionResponse.body);
       String prediction = responseData["prediction"];
-      String outputImageLink = responseData["outputImageLink"];
+      print(prediction);
+
+      String outputImageLink = responseData["image_URL"];
 
       ImageDownloader imageDownloader = ImageDownloader();
 
@@ -114,6 +140,8 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     }
     else {
       print('Server response status: ${serverUpResponse.statusCode}');
+      print("Server status: DOWN");
+
       return {"statusCode": serverUpResponse.statusCode};
     }
   }
@@ -157,7 +185,7 @@ class _ExamineLeafState extends State<ExamineLeaf> {
     // IF THERE IS INTERNET CONNECTION
     // UPLOAD IMAGE TO FIREBASE STORAGE
     if(connectivityResult != ConnectivityResult.none) {
-
+      print("Internet connectivity available");
       // GET ML SERVER LINK FROM FIREBASE RTDB
       DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("server_url");
       var serverURLString;
@@ -166,6 +194,10 @@ class _ExamineLeafState extends State<ExamineLeaf> {
 
       Map<String, dynamic> result = await predictClassOnline(serverURL, imagePath);
       if(result["statusCode"] != 200) {
+
+        print("Server unavailable");
+        print("Predicting class using local model");
+
         // PREDICT USING LOCAL ML MODEL
         await loadModel();
         Map<String, String> _result = await predictClass(imagePath);
@@ -180,6 +212,8 @@ class _ExamineLeafState extends State<ExamineLeaf> {
       }
     }
     else {
+      print("No internet connectivity");
+      print("Predicting class using local model");
       // PREDICT USING LOCAL ML MODEL
       await loadModel();
       Map<String, String> result = await predictClass(imagePath);

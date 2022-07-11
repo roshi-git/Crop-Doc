@@ -52,7 +52,6 @@ class _SplashScreen extends State<SplashScreen> {
     DatabaseReference dbRef = FirebaseDatabase.instance.reference().child("plantsList");
     var values;
     await dbRef.get().then((snapshot) => values = snapshot.value);
-
     Box<PlantInfo> plantInfoDatabase = Hive.box<PlantInfo>("plantInfo");
     Box<List<String>> diseaseListDatabase = Hive.box<List<String>>("diseases");
     Box<DiseaseInfo> diseaseInfoDatabase = Hive.box<DiseaseInfo>("diseaseInfo");

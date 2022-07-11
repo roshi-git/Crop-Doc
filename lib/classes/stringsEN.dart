@@ -17,4 +17,6 @@ class AppStringsEN extends AppStrings {
   String detectingDiseases = "Detecting Diseases";
   String markingAreas = "Marking Spots";
   String leafInfo = "Leaf Info";
+  String surveyLinkEnglish = "Survey Link - English";
+  String surveyLinkHindi = "Survey Link - Hindi";
 }

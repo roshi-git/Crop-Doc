@@ -5,6 +5,7 @@ import 'package:crop_doctor/classes/stringsHI.dart';
 import 'package:flutter/material.dart';
 import 'package:crop_doctor/classes/colors.dart';
 import 'package:hive/hive.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class About extends StatefulWidget {
   @override
@@ -45,6 +46,9 @@ class _AboutState extends State<About> {
 
       String languageID = appStrings!.languageID;
 
+      String surveyLinkEnglish = appStates.get("surveyLinkEnglish");
+      String surveyLinkHindi = appStates.get("surveyLinkHindi");
+
       String aboutText;
       if(languageID == "EN") {
         aboutText = appStates.get("aboutEN");
@@ -81,12 +85,37 @@ class _AboutState extends State<About> {
           title: Text(appStrings!.about),
           backgroundColor: AppColor.appBarColorLight,
         ),
-        body: Center(
-          child: Text(
-            aboutText,
-            style: TextStyle(
-              fontSize: 17
-            ),
+        body: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: ListView(
+            children: [
+              Center(
+                child: Text(
+                  aboutText,
+                  style: TextStyle(
+                      fontSize: 17
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              Center(
+                child: InkWell(
+                    child: Text(appStrings!.surveyLinkEnglish),
+                    onTap: () => launch(surveyLinkEnglish)
+                ),
+              ),
+
+              SizedBox(height: 5),
+
+              Center(
+                child: InkWell(
+                    child: Text(appStrings!.surveyLinkHindi),
+                    onTap: () => launch(surveyLinkHindi)
+                ),
+              )
+            ]
           ),
         ),
       );
